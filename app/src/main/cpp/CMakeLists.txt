@@ -12,6 +12,13 @@ project("unittest")
 set(VCPKG_ROOT "/Users/koseonjae/workspace/vcpkg" CACHE STRING "")
 include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
+option(APPLY_OPTIMIZATION "Apply compiler optimization." ON)
+if (APPLY_OPTIMIZATION)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+endif()
+
 find_package(OpenCL REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
