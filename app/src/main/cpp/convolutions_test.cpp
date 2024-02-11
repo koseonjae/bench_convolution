@@ -19,7 +19,7 @@ class ConvolutionTest : public ::testing::Test {
 };
 
 TEST_F(ConvolutionTest, convolution_cpu) {
-  auto timer = Timer("convolution_cpu");
+  auto timer = Timer("***\nconvolution_cpu");
   convolution_cpu(image, filter, result);
 }
 
