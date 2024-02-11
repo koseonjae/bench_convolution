@@ -1,4 +1,4 @@
-#include "adder.h"
+#include "convolutions.h"
 
 #include <jni.h>
 #include <string>
@@ -55,9 +55,9 @@ Timer::~Timer() {
   __android_log_print(ANDROID_LOG_DEBUG, "Timer", "%s", str.c_str());
 }
 
-void convolution_cpu(const std::vector<int> &image,
-					 const std::vector<int> &filter,
-					 std::vector<int> &result) {
+void convolution_cpu(const std::vector<int>& image,
+					 const std::vector<int>& filter,
+					 std::vector<int>& result) {
   for (int i = 0; i < IMAGE_HEIGHT - FILTER_HEIGHT + 1; ++i) {
 	for (int j = 0; j < IMAGE_WIDTH - FILTER_WIDTH + 1; ++j) {
 	  int sum = 0;
@@ -71,9 +71,9 @@ void convolution_cpu(const std::vector<int> &image,
   }
 }
 
-void convolution_cpu_cache(const std::vector<int> &image,
-						   const std::vector<int> &filter,
-						   std::vector<int> &result) {
+void convolution_cpu_cache(const std::vector<int>& image,
+						   const std::vector<int>& filter,
+						   std::vector<int>& result) {
   int result_width = IMAGE_WIDTH - FILTER_WIDTH + 1;
   int result_height = IMAGE_HEIGHT - FILTER_HEIGHT + 1;
 
@@ -104,9 +104,9 @@ void convolution_cpu_cache(const std::vector<int> &image,
   }
 }
 
-void convolution_cpu_cache_optimized(const std::vector<int> &image,
-									 const std::vector<int> &filter,
-									 std::vector<int> &result) {
+void convolution_cpu_cache_optimized(const std::vector<int>& image,
+									 const std::vector<int>& filter,
+									 std::vector<int>& result) {
   int result_width = IMAGE_WIDTH - FILTER_WIDTH + 1;
   int result_height = IMAGE_HEIGHT - FILTER_HEIGHT + 1;
 
@@ -138,9 +138,9 @@ void convolution_cpu_cache_optimized(const std::vector<int> &image,
   }
 }
 
-void convolution_simd_4(const std::vector<int> &image,
-						const std::vector<int> &filter,
-						std::vector<int> &result) {
+void convolution_simd_4(const std::vector<int>& image,
+						const std::vector<int>& filter,
+						std::vector<int>& result) {
   for (int i = 0; i < IMAGE_HEIGHT - FILTER_HEIGHT + 1; ++i) {
 	for (int j = 0; j < IMAGE_WIDTH - FILTER_WIDTH + 1; ++j) {
 	  int sum = 0;
@@ -166,9 +166,9 @@ void convolution_simd_4(const std::vector<int> &image,
   }
 }
 
-void convolution_simd_16(const std::vector<int> &image,
-						 const std::vector<int> &filter,
-						 std::vector<int> &result) {
+void convolution_simd_16(const std::vector<int>& image,
+						 const std::vector<int>& filter,
+						 std::vector<int>& result) {
   for (int i = 0; i < IMAGE_HEIGHT - FILTER_HEIGHT + 1; ++i) {
 	for (int j = 0; j < IMAGE_WIDTH - FILTER_WIDTH + 1; ++j) {
 	  int sum = 0;
@@ -204,9 +204,9 @@ void convolution_simd_16(const std::vector<int> &image,
   }
 }
 
-void convolution_opencl(const std::vector<int> &image,
-						const std::vector<int> &filter,
-						std::vector<int> &result) {
+void convolution_opencl(const std::vector<int>& image,
+						const std::vector<int>& filter,
+						std::vector<int>& result) {
   cl_uint num_platforms = 0;
   cl_platform_id platform_id = NULL;
   cl_device_id device_id = NULL;
@@ -230,7 +230,7 @@ void convolution_opencl(const std::vector<int> &image,
   queue = clCreateCommandQueue(context, device_id, 0, &ret);
 
   // 커널 소스 코드 정의
-  const char *kernel_code =
+  const char* kernel_code =
 	  "__kernel void convolution(__global const int* image, __global const int* filter, __global int* result) {"
 	  "  int i = get_global_id(0);"
 	  "  int j = get_global_id(1);"
@@ -254,24 +254,33 @@ void convolution_opencl(const std::vector<int> &image,
   image_buffer = clCreateBuffer(context,
 								CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 								sizeof(int) * image.size(),
-								(void *) &image[0],
+								(void*)&image[0],
 								&ret);
   filter_buffer = clCreateBuffer(context,
 								 CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 								 sizeof(int) * filter.size(),
-								 (void *) &filter[0],
+								 (void*)&filter[0],
 								 &ret);
-  result_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(int) * result.size(), NULL, &ret);
+  result_buffer =
+	  clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(int) * result.size(), NULL, &ret);
 
   // 커널 아규먼트 설정
-  ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *) &image_buffer);
-  ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *) &filter_buffer);
-  ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *) &result_buffer);
+  ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*)&image_buffer);
+  ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void*)&filter_buffer);
+  ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void*)&result_buffer);
 
   // 커널 실행
   size_t global_item_size[2] = {IMAGE_WIDTH - FILTER_WIDTH + 1, IMAGE_HEIGHT - FILTER_HEIGHT + 1};
   size_t local_item_size[2] = {1, 1};
-  ret = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global_item_size, local_item_size, 0, NULL, NULL);
+  ret = clEnqueueNDRangeKernel(queue,
+							   kernel,
+							   2,
+							   NULL,
+							   global_item_size,
+							   local_item_size,
+							   0,
+							   NULL,
+							   NULL);
 
   // 결과 버퍼 읽기
   ret = clEnqueueReadBuffer(queue, result_buffer, CL_TRUE, 0,

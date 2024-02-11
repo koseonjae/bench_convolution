@@ -1,4 +1,4 @@
-#include "adder.h"
+#include "convolutions.h"
 
 #include "gtest/gtest.h"
 
@@ -6,9 +6,10 @@ class ConvolutionTest : public ::testing::Test {
  protected:
   void
   SetUp() override {
-    image = generateRandomImage();
-    filter = std::vector<int>(FILTER_HEIGHT * FILTER_WIDTH, 1);
-    result = std::vector<int>((IMAGE_HEIGHT - FILTER_HEIGHT + 1) * (IMAGE_WIDTH - FILTER_WIDTH + 1));
+	image = generateRandomImage();
+	filter = std::vector<int>(FILTER_HEIGHT * FILTER_WIDTH, 1);
+	result =
+		std::vector<int>((IMAGE_HEIGHT - FILTER_HEIGHT + 1) * (IMAGE_WIDTH - FILTER_WIDTH + 1));
   }
 
  public:
